@@ -1,0 +1,41 @@
+{
+  "name": "batch-rename-tool",
+  "version": "1.0.0",
+  "description": "A batch file renaming tool built with Electron and Vue 3",
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && electron-builder"
+  },
+  "dependencies": {
+    "vue": "^3.4.21"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.4",
+    "electron": "^29.1.1",
+    "electron-builder": "^24.13.3",
+    "vite": "^5.1.6",
+    "vite-plugin-electron": "^0.28.4",
+    "vite-plugin-electron-renderer": "^0.14.5"
+  },
+  "packageManager": "pnpm@8.15.9+sha512.499434c9d8fdd1a2794ebf4552b3b25c0a633abcee5bb15e7b5de90f32f47b513aca98cd5cfd001c31f0db454bc3804edccd578501e4ca293a6816166bbd9f81",
+  "build": {
+    "appId": "com.batchrename.app",
+    "productName": "批量重命名工具",
+    "directories": {
+      "output": "release"
+    },
+    "mac": {
+      "category": "public.app-category.utilities",
+      "target": ["dmg", "zip"]
+    },
+    "win": {
+      "target": ["nsis", "portable"]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "shortcutName": "批量重命名工具"
+    }
+  }
+}
