@@ -1,6 +1,8 @@
 # Rename
 
-基于 **Electron + Vue 3 + Vite** 的批量文件重命名桌面应用，在本地选择文件夹后，用可排序的规则组合生成新文件名，并支持预览后再一键重命名。
+基于 **Tauri + Rust + Vue 3 + Vite** 的批量文件重命名桌面应用，在本地选择文件夹后，用可排序的规则组合生成新文件名，并支持预览后再一键重命名。
+
+由于使用了 Tauri (Rust)，最终打包的安装包体积仅有 **几 MB**，远小于 Electron 的 100MB+，且运行速度极快、内存占用极低。
 
 ## 功能概览
 
@@ -23,43 +25,40 @@
 
 ## 技术栈
 
-- [Electron](https://www.electronjs.org/) 29
+- [Tauri](https://tauri.app/) (Rust)
 - [Vue 3](https://vuejs.org/)
 - [Vite](https://vitejs.dev/) 5
-- [vite-plugin-electron](https://github.com/electron-vite/vite-plugin-electron)
 
 ## 环境要求
 
-- **Node.js**：建议 **18.x 或更高**（与当前 Electron / Vite 版本兼容；过旧的 Node 可能无法正常运行 `npm` 或开发命令）。
-- 包管理器：可使用 **npm**、**pnpm** 或 **yarn**（仓库中声明了 `pnpm` 作为可选的 `packageManager`）。
+- **Node.js**：建议 18.x 或更高。
+- **Rust**：需要安装 Rust 编译环境（`rustc` 和 `cargo`）。
+- **C++ 编译工具**：macOS 需要 Xcode Command Line Tools，Windows 需要 Visual Studio C++ Build Tools。
 
 ## 安装依赖
 
 ```bash
-cd rename
 npm install
-# 或
-pnpm install
 ```
 
 ## 开发调试
 
 ```bash
-npm run dev
+npm run tauri dev
 ```
 
-会启动 Vite 开发服务并打开 Electron 窗口，支持热更新。
+会启动 Vite 开发服务并编译 Rust 后端，打开 Tauri 窗口，支持热更新。
 
 ## 打包发布
 
 ```bash
-npm run build
+npm run tauri build
 ```
 
-流程为：先执行 `vite build` 构建渲染进程与主进程产物，再调用 **electron-builder** 打安装包。
+流程为：先执行 `vite build` 构建渲染进程产物，再调用 `cargo` 编译 Rust 代码并生成安装包。
 
-- **macOS**：产物在 `release/` 下，常见为 `.dmg`、`.zip`。
-- **Windows**：需在 Windows 环境执行同样命令，可得到 `.exe` 安装包与便携版（具体见 `package.json` 中 `build` 配置）。
+- **macOS**：产物在 `src-tauri/target/release/bundle/` 下，常见为 `.dmg`、`.app`。
+- **Windows**：需在 Windows 环境执行同样命令，可得到 `.msi` 安装包。
 
 将对应平台的安装包或压缩包分发给用户即可；用户无需安装 Node。
 
@@ -74,7 +73,7 @@ npm run build
 
 ```
 rename/
-├── electron/          # 主进程、预加载脚本（对话框、读目录、重命名）
+├── src-tauri/         # Rust 后端代码、打包配置 (tauri.conf.json)
 ├── src/               # Vue 3 界面与规则逻辑
 ├── index.html
 ├── vite.config.js

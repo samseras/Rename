@@ -156,6 +156,8 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { open } from '@tauri-apps/api/dialog'
+import { invoke } from '@tauri-apps/api/tauri'
 
 const currentDirectory = ref('')
 const files = ref([])
@@ -200,20 +202,31 @@ const moveRule = (index, direction) => {
 
 // 选择目录
 const selectDirectory = async () => {
-  const dir = await window.electronAPI.openDirectory()
-  if (dir) {
-    currentDirectory.value = dir
-    await loadFiles(dir)
+  try {
+    const dir = await open({
+      directory: true,
+      multiple: false
+    })
+    if (dir) {
+      currentDirectory.value = dir
+      await loadFiles(dir)
+    }
+  } catch (e) {
+    console.error('选择目录失败:', e)
   }
 }
 
 // 读取文件
 const loadFiles = async (dir) => {
-  const result = await window.electronAPI.readDirectory(dir)
-  files.value = result.filter(f => !f.name.startsWith('.')).map(f => ({
-    ...f,
-    status: 'pending'
-  }))
+  try {
+    const result = await invoke('read_directory', { dirPath: dir })
+    files.value = result.filter(f => !f.name.startsWith('.')).map(f => ({
+      ...f,
+      status: 'pending'
+    }))
+  } catch (e) {
+    console.error('读取目录失败:', e)
+  }
 }
 
 // 格式化时间戳
@@ -362,17 +375,17 @@ const executeRename = async () => {
     const newPath = oldPath.substring(0, oldPath.lastIndexOf('/') + 1) + file.newName 
                     || oldPath.substring(0, oldPath.lastIndexOf('\\') + 1) + file.newName
 
-    const result = await window.electronAPI.renameFile(oldPath, newPath)
-    if (result.success) {
+    try {
+      await invoke('rename_file', { oldPath, newPath })
       file.status = 'success'
       const targetFile = files.value.find(f => f.name === file.oldName)
       if (targetFile) {
         targetFile.name = file.newName
         targetFile.path = newPath
       }
-    } else {
+    } catch (error) {
       file.status = 'error'
-      console.error(result.error)
+      console.error(error)
     }
   }
 
